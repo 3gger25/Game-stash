@@ -1,13 +1,109 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Credits and Information</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple HTML5 Canvas Game</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #222;
+            color: white;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        canvas {
+            border: 4px solid #fff;
+            background-color: #111;
+            cursor: crosshair;
+        }
+    </style>
 </head>
 <body>
-    <h1>Credits to:
-<p>me</p>
-<p>Yinnotayl</p>
-    </h1>BIG thanks to Mr. Smith for helping me figure all this out
-    <p>Welcome to my GitHub Pages website.</p>
+
+    <h1>Score: <span id="scoreBoard">0</span></h1>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+
+    <script>
+        // 1. Setup the Canvas and Context
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreBoard = document.getElementById('scoreBoard');
+
+        // 2. Game Variables
+        let score = 0;
+        let target = {
+            x: Math.random() * (canvas.width - 40) + 20,
+            y: Math.random() * (canvas.height - 40) + 20,
+            radius: 20,
+            speedX: 2,
+            speedY: 2
+        };
+
+        // 3. Game Loop (Updates and draws the game continuously)
+        function gameLoop() {
+            // Clear the previous frame
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Move the target
+            target.x += target.speedX;
+            target.y += target.speedY;
+
+            // Bounce off the horizontal walls
+            if (target.x - target.radius < 0 || target.x + target.radius > canvas.width) {
+                target.speedX = -target.speedX;
+            }
+            // Bounce off the vertical walls
+            if (target.y - target.radius < 0 || target.y + target.radius > canvas.height) {
+                target.speedY = -target.speedY;
+            }
+
+            // Draw the target (a bright red circle)
+            ctx.beginPath();
+            ctx.arc(target.x, target.y, target.radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#ff4757';
+            ctx.fill();
+            ctx.closePath();
+
+            // Call the next frame
+            requestAnimationFrame(gameLoop);
+        }
+
+        // 4. Handle Player Input (Clicking the target)
+        canvas.addEventListener('click', function(event) {
+            // Get click coordinates relative to the canvas boundary
+            const rect = canvas.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const clickY = event.clientY - rect.top;
+
+            // Calculate distance between the click and the center of the target
+            const distance = Math.hypot(clickX - target.x, clickY - target.y);
+
+            // If the click is inside the circle's radius, the player scores!
+            if (distance < target.radius) {
+                score += 1;
+                scoreBoard.innerText = score;
+
+                // Teleport the target to a new random position
+                target.x = Math.random() * (canvas.width - 40) + 20;
+                target.y = Math.random() * (canvas.height - 40) + 20;
+                
+                // Slightly increase speed to make it harder
+                target.speedX *= 1.1;
+                target.speedY *= 1.1;
+            }
+        });
+
+        // Start the game loop
+        gameLoop();
+    </script>
 </body>
 </html>
